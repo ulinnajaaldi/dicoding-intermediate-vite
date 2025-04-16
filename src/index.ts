@@ -1,3 +1,5 @@
+import 'toastify-js/src/toastify.css';
+
 import './style.css';
 
 import App from './pages/app';

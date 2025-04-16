@@ -1,10 +1,49 @@
 import { BASE_URL } from '../constants/config';
 
-const ENDPOINTS = {
-  ENDPOINT: `${BASE_URL}/your/endpoint/here`,
+export const ENDPOINTS = {
+  REGISTER: `${BASE_URL}/register`,
+  LOGIN: `${BASE_URL}/login`,
+  ALL_STORIES: `${BASE_URL}/stories`,
 };
 
-export async function getData() {
-  const fetchResponse = await fetch(ENDPOINTS.ENDPOINT);
-  return await fetchResponse.json();
+export async function getRegistered({
+  name,
+  email,
+  password,
+}: {
+  name: string;
+  email: string;
+  password: string;
+}) {
+  const response = await fetch(ENDPOINTS.REGISTER, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  const results = await response.json();
+
+  return {
+    ...results,
+    ok: response.ok,
+  };
+}
+
+export async function getLogin({ email, password }: { email: string; password: string }) {
+  const response = await fetch(ENDPOINTS.LOGIN, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const results = await response.json();
+
+  return {
+    ...results,
+    ok: response.ok,
+  };
 }
