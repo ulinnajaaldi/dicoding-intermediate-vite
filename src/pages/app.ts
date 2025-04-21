@@ -1,3 +1,5 @@
+import Toastify from 'toastify-js';
+
 import {
   generateNavigationAuthenticated,
   generateNavigationUnauthenticated,
@@ -23,6 +25,16 @@ class App {
     this.#drawerButton = drawerButton;
     this.#navigationDrawer = navigationDrawer;
 
+    // Set initial ARIA states
+    if (this.#navigationDrawer) {
+      this.#navigationDrawer.setAttribute('aria-hidden', 'true');
+    }
+
+    if (this.#drawerButton) {
+      this.#drawerButton.setAttribute('aria-expanded', 'false');
+      this.#drawerButton.setAttribute('aria-controls', 'navigation-drawer');
+    }
+
     this.#setupDrawer();
   }
 
@@ -31,16 +43,40 @@ class App {
       this.#navigationDrawer?.classList.toggle('translate-x-full');
       this.#navigationDrawer?.classList.add('right-0');
       this.#navigationDrawer?.classList.remove('-right-[100%]');
+
+      const isExpanded = !this.#navigationDrawer?.classList.contains('translate-x-full');
+      this.#drawerButton?.setAttribute('aria-expanded', String(isExpanded));
+
+      if (isExpanded) {
+        this.#navigationDrawer?.setAttribute('aria-hidden', 'false');
+      } else {
+        this.#navigationDrawer?.setAttribute('aria-hidden', 'true');
+        this.#drawerButton?.focus();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      const closeButton = document.getElementById('close-button');
+      if (closeButton && e.target === closeButton) {
+        this.#navigationDrawer?.classList.add('translate-x-full', 'right-0');
+        this.#navigationDrawer?.setAttribute('aria-hidden', 'true');
+        this.#drawerButton?.setAttribute('aria-expanded', 'false');
+        this.#drawerButton?.focus();
+      }
     });
 
     document.body.addEventListener('click', (e: any) => {
       if (!this.#navigationDrawer?.contains(e.target) && !this.#drawerButton?.contains(e.target)) {
         this.#navigationDrawer?.classList.add('translate-x-full', 'right-0');
+        this.#navigationDrawer?.setAttribute('aria-hidden', 'true');
+        this.#drawerButton?.setAttribute('aria-expanded', 'false');
       }
 
       this.#navigationDrawer?.querySelectorAll('a').forEach((link) => {
         if (link.contains(e.target)) {
           this.#navigationDrawer?.classList.add('translate-x-full', 'right-0');
+          this.#navigationDrawer?.setAttribute('aria-hidden', 'true');
+          this.#drawerButton?.setAttribute('aria-expanded', 'false');
         }
       });
     });
@@ -66,8 +102,36 @@ class App {
         getLogout();
 
         location.hash = '/login';
+        Toastify({
+          text: 'Logout Berhasil',
+          duration: 3000,
+        }).showToast();
       }
     });
+
+    const focusableElements = this.#navigationDrawer?.querySelectorAll('a, button') || [];
+
+    if (focusableElements.length > 0) {
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      lastElement.addEventListener('keydown', (event) => {
+        if (event.key === 'Tab' && !event.shiftKey) {
+          this.#navigationDrawer?.classList.add('translate-x-full', 'right-0');
+          this.#navigationDrawer?.setAttribute('aria-hidden', 'true');
+          this.#drawerButton?.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      const firstElement = focusableElements[0] as HTMLElement;
+
+      firstElement.addEventListener('keydown', (event) => {
+        if (event.key === 'Tab' && event.shiftKey) {
+          this.#navigationDrawer?.classList.add('translate-x-full', 'right-0');
+          this.#navigationDrawer?.setAttribute('aria-hidden', 'true');
+          this.#drawerButton?.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
   }
 
   async renderPage() {
@@ -90,11 +154,6 @@ class App {
       scrollTo({ top: 0, behavior: 'instant' });
       this.#setupNavigationList();
     });
-
-    // if (this.#content) {
-    //   this.#content.innerHTML = await page.render();
-    //   await page.afterRender();
-    // }
   }
 }
 
