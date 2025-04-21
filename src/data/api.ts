@@ -1,4 +1,5 @@
 import { BASE_URL } from '../constants/config';
+import { getAccessToken } from '../utils/auth';
 
 export const ENDPOINTS = {
   REGISTER: `${BASE_URL}/register`,
@@ -38,6 +39,24 @@ export async function getLogin({ email, password }: { email: string; password: s
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ email, password }),
+  });
+
+  const results = await response.json();
+
+  return {
+    ...results,
+    ok: response.ok,
+  };
+}
+
+export async function getAllStories() {
+  const accessToken = getAccessToken();
+
+  const response = await fetch(`${ENDPOINTS.ALL_STORIES}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   const results = await response.json();
