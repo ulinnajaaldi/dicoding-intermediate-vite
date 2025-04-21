@@ -5,14 +5,21 @@ interface LoginView {
   loginSuccessfully(message: string): void;
 }
 
+export interface Root {
+  error: boolean;
+  message: string;
+  loginResult: LoginResult;
+  ok: boolean;
+}
+
+export interface LoginResult {
+  userId: string;
+  name: string;
+  token: string;
+}
+
 interface LoginModel {
-  getLogin(credentials: { email: string; password: string }): Promise<{
-    ok: boolean;
-    message: string;
-    data: {
-      accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXJzLXMwZkhPY1VrX1M4RkM2cDIiLCJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsImlhdCI6MTc0NDgxNTAwM30.vZyoU4tF5-JrxFnMO3ooieZnT5BZ3Teg163iwkmlBkA';
-    };
-  }>;
+  getLogin(credentials: { email: string; password: string }): Promise<Root>;
 }
 
 interface LoginCredentials {
@@ -54,7 +61,7 @@ export default class LoginPresenter {
         return;
       }
 
-      this.#authModel.putAccessToken(response.data.accessToken);
+      this.#authModel.putAccessToken(response.loginResult.token);
 
       this.#view.loginSuccessfully(response.message);
     } catch (error) {

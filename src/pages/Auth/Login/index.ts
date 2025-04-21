@@ -10,7 +10,7 @@ export default class LoginPage {
   async render() {
     return `
     <section class="container h-[90svh] flex items-center flex-col justify-center">
-        <h1 class="text-4xl mb-8">Login</h1>
+        <h1 class="text-4xl mb-8">Masuk</h1>
         <form id="login-form" class="flex flex-col gap-4 w-full max-w-sm ">  
             <div class="flex flex-col gap-2">
                 <label for="email">Email <span class="text-red-600">*</span></label>

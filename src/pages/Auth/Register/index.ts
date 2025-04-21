@@ -9,7 +9,7 @@ export default class RegisterPage {
   async render() {
     return `
     <section class="container h-[90svh] flex items-center flex-col justify-center">
-        <h1 class="text-4xl mb-8">Register</h1>
+        <h1 class="text-4xl mb-8">Daftar</h1>
         <form id="register-form" class="flex flex-col gap-4 w-full max-w-sm ">  
             <div class="flex flex-col gap-2">
                 <label for="name" >Name <span class="text-red-600">*</span></label>
