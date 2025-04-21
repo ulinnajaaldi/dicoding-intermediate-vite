@@ -66,5 +66,36 @@ label {
 }
 
 .button-custom {
-  @apply inline-flex items-center justify-center whitespace-nowrap rounded-base text-sm font-base ring-offset-white transition-all gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-main-foreground bg-main border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none h-10 px-4 py-2;
+  @apply inline-flex items-center justify-center whitespace-nowrap rounded-base text-sm font-base ring-offset-white transition-all gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-main-foreground bg-main border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none h-10 px-4 py-2 cursor-pointer;
+}
+
+.button-custom-neutral {
+  @apply inline-flex items-center justify-center whitespace-nowrap rounded-base text-sm font-base ring-offset-white transition-all gap-2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary-background text-foreground border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none cursor-pointer;
+}
+
+.card {
+  @apply rounded-base flex flex-col shadow-shadow border-2 gap-4 p-6 border-border bg-background text-foreground font-base justify-between;
+}
+.card-header {
+  @apply flex flex-col gap-0.5;
+}
+
+.card-body {
+  @apply text-base;
+}
+
+.story-container {
+  @apply grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4;
+}
+
+.story-card-skeleton {
+  @apply w-full p-6 bg-neutral-50 h-80 rounded-base animate-pulse;
+}
+
+.page-wrapper {
+  @apply container min-h-[70svh] my-24 md:my-28 lg:my-32 2xl:my-40;
+}
+
+.page-error-wrapper {
+  @apply container min-h-[92svh] flex items-center justify-center;
 }
