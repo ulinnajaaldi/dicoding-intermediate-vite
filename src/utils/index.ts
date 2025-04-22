@@ -76,8 +76,11 @@ export function convertBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
-export function setupSkipToContent(element: HTMLElement, mainContent: HTMLElement) {
-  element.addEventListener('click', () => mainContent.focus());
+export function setupSkipToContent(element: HTMLElement | null, mainContent: HTMLElement | null) {
+  element?.addEventListener('click', () => {
+    console.log('Skip to content clicked');
+    mainContent?.focus();
+  });
 }
 
 export function transitionHelper({

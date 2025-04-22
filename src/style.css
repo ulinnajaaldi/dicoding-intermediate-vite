@@ -99,3 +99,11 @@ label {
 .page-error-wrapper {
   @apply container min-h-[92svh] flex items-center justify-center;
 }
+
+.maps-loading-container {
+  @apply h-[600px] bg-gray-100 animate-pulse;
+}
+
+.maps-container {
+  @apply h-[600px] w-full rounded-md;
+}

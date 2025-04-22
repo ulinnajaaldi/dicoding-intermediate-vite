@@ -52,7 +52,7 @@ export async function getLogin({ email, password }: { email: string; password: s
 export async function getAllStories() {
   const accessToken = getAccessToken();
 
-  const response = await fetch(`${ENDPOINTS.ALL_STORIES}`, {
+  const response = await fetch(`${ENDPOINTS.ALL_STORIES}?size=${12}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${accessToken}`,

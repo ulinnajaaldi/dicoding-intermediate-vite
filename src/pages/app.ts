@@ -5,7 +5,7 @@ import {
   generateNavigationUnauthenticated,
 } from '../components/templates';
 import routes from '../constants/routes';
-import { transitionHelper } from '../utils';
+import { setupSkipToContent, transitionHelper } from '../utils';
 import { getAccessToken, getLogout } from '../utils/auth';
 import { getActiveRoute } from '../utils/url-parser';
 
@@ -13,19 +13,28 @@ type AppConstructor = {
   navigationDrawer: HTMLElement | null;
   drawerButton: HTMLElement | null;
   content: HTMLElement | null;
+  skipContent: HTMLElement | null;
 };
 
 class App {
   #content: HTMLElement | null;
   #drawerButton: HTMLElement | null;
   #navigationDrawer: HTMLElement | null;
+  #skipContent: HTMLElement | null;
 
-  constructor({ navigationDrawer, drawerButton, content }: AppConstructor) {
+  constructor({ navigationDrawer, drawerButton, content, skipContent }: AppConstructor) {
     this.#content = content;
     this.#drawerButton = drawerButton;
     this.#navigationDrawer = navigationDrawer;
+    this.#skipContent = skipContent;
 
+    this.#init();
+  }
+
+  #init() {
     // Set initial ARIA states
+    setupSkipToContent(this.#skipContent, this.#content);
+
     if (this.#navigationDrawer) {
       this.#navigationDrawer.setAttribute('aria-hidden', 'true');
     }

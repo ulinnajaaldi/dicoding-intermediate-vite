@@ -1,4 +1,4 @@
-import { IStory } from '../types/api';
+import { StoryMapper } from '../data/api-mapper';
 
 export const generateNavigationUnauthenticated = () => {
   return `
@@ -29,10 +29,9 @@ export const generateCardStory = ({
   name,
   createdAt,
   description,
-  lat,
-  lon,
+  location,
   photoUrl,
-}: IStory) => {
+}: StoryMapper) => {
   return `
                 <div tabindex="0" data-storyid="${id}" class="card">
                     <div class="flex flex-col gap-2">
@@ -42,7 +41,7 @@ export const generateCardStory = ({
                         <div class="card-header">
                             <h2 class="text-lg font-semibold">${name}</h2>
                             <div class="flex items-center flex-wrap justify-between w-full">
-                                ${lat || lon ? `<p class="text-base">${lat}-${lon}</p>` : ``}
+                                ${location ? `<p class="text-base">${location.placeName}</p>` : ``}
                                 <p class="text-sm">${new Date(createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                             </div>
                         </div>

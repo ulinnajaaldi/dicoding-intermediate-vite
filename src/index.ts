@@ -1,4 +1,5 @@
 import 'toastify-js/src/toastify.css';
+import 'leaflet/dist/leaflet.css';
 
 import './style.css';
 
@@ -9,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     content: document.querySelector('#main-content'),
     navigationDrawer: document.querySelector('#navigation-drawer'),
     drawerButton: document.querySelector('#drawer-button'),
+    skipContent: document.querySelector('#skip-link'),
   });
   app.renderPage();
 
