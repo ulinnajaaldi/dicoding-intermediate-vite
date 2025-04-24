@@ -1,3 +1,4 @@
+import AddNewStory from '../pages/AddNewStory';
 import LoginPage from '../pages/Auth/Login';
 import RegisterPage from '../pages/Auth/Register';
 import HomePage from '../pages/Homepage';
@@ -7,6 +8,7 @@ const routes = {
   '/login': () => checkUnauthenticatedRouteOnly(new LoginPage()),
   '/register': () => checkUnauthenticatedRouteOnly(new RegisterPage()),
   '/': () => checkAuthenticatedRoute(new HomePage()),
+  '/add-new-story': () => checkAuthenticatedRoute(new AddNewStory()),
 };
 
 export default routes;
