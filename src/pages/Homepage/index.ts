@@ -1,6 +1,5 @@
 import HomePresenter from './presenter';
 import * as STORY_API from '../../data/api';
-import { IStory } from '../../types/api';
 import { generateCardStory } from '../../components/templates';
 import Map from '../../utils/maps';
 import { StoryMapper } from '../../data/api-mapper';
@@ -94,8 +93,8 @@ export default class HomePage {
 
   hideLoading() {
     const container = document.getElementById('loading-container') as HTMLDivElement;
-    container.classList.add('hidden');
-    container.classList.remove('story-container');
+    container?.classList.add('hidden');
+    container?.classList.remove('story-container');
     container.innerHTML = '';
   }
 

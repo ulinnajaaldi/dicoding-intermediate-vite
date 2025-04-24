@@ -7,3 +7,10 @@ export type IStory = {
   lat: number;
   lon: number;
 };
+
+export type IAddNewStory = {
+  description: string;
+  photo: Blob;
+  lat: number;
+  lon: number;
+};

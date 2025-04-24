@@ -1,10 +1,12 @@
 import { BASE_URL } from '../constants/config';
+import { IAddNewStory } from '../types/api';
 import { getAccessToken } from '../utils/auth';
 
 export const ENDPOINTS = {
   REGISTER: `${BASE_URL}/register`,
   LOGIN: `${BASE_URL}/login`,
   ALL_STORIES: `${BASE_URL}/stories`,
+  ADD_NEW_STORY: `${BASE_URL}/stories`,
 };
 
 export async function getRegistered({
@@ -57,6 +59,31 @@ export async function getAllStories() {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+  });
+
+  const results = await response.json();
+
+  return {
+    ...results,
+    ok: response.ok,
+  };
+}
+
+export async function mutateNewStory({ description, photo, lat, lon }: IAddNewStory) {
+  const accessToken = getAccessToken();
+
+  const formData = new FormData();
+  formData.append('description', description);
+  formData.append('photo', photo);
+  formData.append('lat', lat.toString());
+  formData.append('lon', lon.toString());
+
+  const response = await fetch(`${ENDPOINTS.ADD_NEW_STORY}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
   });
 
   const results = await response.json();
