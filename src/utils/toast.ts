@@ -7,7 +7,6 @@ export const useToast = (message: string, type: 'success' | 'error' = 'success')
     close: true,
     gravity: 'bottom',
     position: 'right',
-    backgroundColor: type === 'success' ? '#4CAF50' : '#F44336',
     style: {
       background: type === 'success' ? '#4CAF50' : '#F44336',
       color: '#fff',

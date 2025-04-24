@@ -11,25 +11,6 @@ export function showFormattedDate(date: string | Date, locale = 'en-US', options
   });
 }
 
-// export async function createCarousel(containerElement: HTMLElement, options = {}) {
-//   const { tns } = await import('tiny-slider');
-
-//   return tns({
-//     container: containerElement,
-//     mouseDrag: true,
-//     swipeAngle: false,
-//     speed: 600,
-
-//     nav: true,
-//     navPosition: 'bottom',
-
-//     autoplay: false,
-//     controls: false,
-
-//     ...options,
-//   });
-// }
-
 /**
  * Ref: https://stackoverflow.com/questions/18650168/convert-blob-to-base64
  */

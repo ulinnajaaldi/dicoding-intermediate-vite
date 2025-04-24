@@ -31,7 +31,6 @@ class App {
   }
 
   #init() {
-    // Set initial ARIA states
     setupSkipToContent(this.#skipContent, this.#content);
 
     if (this.#navigationDrawer) {

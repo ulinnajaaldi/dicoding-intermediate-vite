@@ -40,12 +40,10 @@ export const generateCardStory = ({
                 </div>
                 <div class="card-header">
                     <h2 class="text-lg font-semibold">${name}</h2>
-                    <div class="flex items-center flex-wrap justify-between w-full">
+                    <div class="flex items-start flex-wrap justify-between w-full">
                         ${
                           location
-                            ? `<p class="text-base">
-                        <i class="fas fa-map-marker-alt"></i> 
-                        ${location.placeName}</p>`
+                            ? `<p class="text-base w-2/3"> <i class="fas fa-map-marker-alt"></i> ${location.placeName}</p>`
                             : ``
                         }
                         <p class="text-sm">${new Date(createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}</p>

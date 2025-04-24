@@ -3,14 +3,24 @@ import DetailPresenter from './presenter';
 import * as STORY_API from '../../data/api';
 import { parseActivePathname } from '../../utils/url-parser';
 import { StoryMapper } from '../../data/api-mapper';
+import { generatePopoutMap } from '../../components/templates';
 
 export default class Detail {
   #presenter = null as DetailPresenter | null;
   #map = null as Map | null;
+  #pendingMarkers: {
+    coordinate: [number, number];
+    markerOptions: any;
+    popupOptions: any;
+  } = {
+    coordinate: [0, 0],
+    markerOptions: {},
+    popupOptions: {},
+  };
 
   async render() {
     return `
-        <section id="detail-container" class="container mt-24 md:mt-28 lg:mt-32 2xl:mt-40">
+        <section id="detail-container" class="container mt-24 mb-20">
             <div id="detail-story" class=""></div>
             <div id="detail-story-loading-container" class="hidden"></div>
         </section>`;
@@ -25,7 +35,7 @@ export default class Detail {
     await this.#presenter?.initialStory();
   }
 
-  populateStory(message: string, story: StoryMapper) {
+  async populateStory(message: string, story: StoryMapper) {
     if (!story) {
       this.populateStoryError(message);
       return;
@@ -36,19 +46,86 @@ export default class Detail {
     const html = `
         <div class="flex flex-col gap-2">
             <div class="flex flex-col gap-1 items-center justify-center mb-5">
-               <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center">Detail Cerita</h1>
-                <p class="text-sm sm:text-xl lg:text-2xl font-medium text-center">Ceritakan semua yang pengen kamu ceritakan!</p>
+               <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center">${story.name}</h1>
+                <p class="text-sm sm:text-xl lg:text-2xl font-medium text-center">"${story.description}"</p>
             </div>
 
-            <div class="relative w-full h-64 overflow-hidden rounded-lg">
-                <img src="${story.photoUrl}" alt="${story.name}-${story.description}" class="h-64 w-full object-cover rounded-t-lg"/>
+            <div class="grid grid-cols-12 gap-4">
+
+                <div class="relative col-span-12 lg:col-span-8 w-full h-[400px] sm:h-[500px] lg:h-[600px] overflow-hidden rounded-lg card !bg-white">
+                    <img src="${story.photoUrl}" alt="${story.name}-${story.description}" class="h-full w-full object-contain rounded-t-lg"/>
+                </div>
+                ${
+                  story.location
+                    ? `
+                        <div id="map" class="h-[350px] sm:h-[500px] lg:h-[600px] col-span-12 lg:col-span-4 rounded-2xl card"></div>
+                    `
+                    : ''
+                }
             </div>
-            
-            <div id="map" class="h-[300px]"></div>
-            <div id="map-loading-container" class="hidden"></div>
+
         </div>
     `;
+
     container.innerHTML = html;
+
+    this.storeMarkerData(story);
+  }
+
+  storeMarkerData(story: StoryMapper) {
+    if (!story?.location || story.location.latitude == null || story.location.longitude == null) {
+      return;
+    }
+
+    const lat = parseFloat(String(story.location.latitude));
+    const lng = parseFloat(String(story.location.longitude));
+
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn('Invalid coordinates for story:', story.id);
+      return;
+    }
+
+    const coordinate: [number, number] = [lat, lng];
+    const markerOptions = { alt: `${story.name}-${story.description}` };
+    const popupOptions = {
+      content: generatePopoutMap({ story }),
+    };
+
+    this.#pendingMarkers = {
+      coordinate,
+      markerOptions,
+      popupOptions,
+    };
+  }
+
+  processPendingMarkers() {
+    if (!this.#map || !this.#pendingMarkers) return;
+
+    const { coordinate, markerOptions, popupOptions } = this.#pendingMarkers;
+    if (coordinate && markerOptions && popupOptions) {
+      this.#map.addMarker(coordinate, markerOptions, popupOptions);
+    } else {
+      console.warn('No pending markers to process');
+    }
+  }
+
+  async initialMap() {
+    try {
+      const mapElement = document.getElementById('map');
+      if (mapElement && mapElement.clientHeight === 0) {
+        mapElement.style.height = '400px';
+      }
+
+      this.#map = await Map.build('#map', {
+        zoom: 10,
+        center: this.#pendingMarkers.coordinate,
+        locate: true,
+      });
+
+      this.processPendingMarkers();
+    } catch (error) {
+      console.error('Failed to initialize map:', error);
+    }
   }
 
   populateStoryError(message: string) {
@@ -69,27 +146,5 @@ export default class Detail {
 
   hideLoading() {
     console.log('hideLoading');
-  }
-
-  async initialMap() {
-    this.#map = await Map.build('#map', {
-      zoom: 10,
-      locate: true,
-    });
-  }
-
-  showMapLoading() {
-    const container = document.getElementById('map-loading-container') as HTMLDivElement;
-    container.classList.remove('hidden');
-    container.classList.add('maps-loading-container');
-  }
-
-  hideMapLoading() {
-    const mapContainer = document.getElementById('map') as HTMLDivElement;
-    const container = document.getElementById('map-loading-container') as HTMLDivElement;
-    container.classList.add('hidden');
-    container.classList.remove('maps-loading-container');
-    mapContainer.classList.add('maps-container');
-    container.innerHTML = '';
   }
 }

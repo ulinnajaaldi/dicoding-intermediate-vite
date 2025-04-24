@@ -30,6 +30,9 @@ export default class DetailPresenter {
 
   async initialStory() {
     this.#view.showLoading();
+
+    let storyData;
+
     try {
       const response = await this.#model.getDetailStory(this.#storyId);
       if (!response.ok) {
@@ -38,13 +41,15 @@ export default class DetailPresenter {
         return;
       }
 
-      const story = await storyMapper(response.story);
-      this.#view.populateStory(response.message, story);
+      storyData = await storyMapper(response.story);
 
-      // Initialize map AFTER the story content (with map container) is populated
+      // First populate the story - this creates the map container in the DOM
+      this.#view.populateStory('Success', storyData);
+
+      // Then initialize the map after the container exists
       await this.#view.initialMap();
     } catch (error) {
-      console.log('initialStory: error:', error);
+      console.error('initialStory: error:', error);
       this.#view.populateStoryError((error as Error).message);
     } finally {
       this.#view.hideLoading();

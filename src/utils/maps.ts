@@ -37,6 +37,7 @@ interface GeocodingResponse {
 export default class Map {
   #zoom = 5;
   #map: LeafletMap | null = null;
+  #isInitialized = false;
 
   static isGeolocationAvailable(): boolean {
     return 'geolocation' in navigator;
@@ -125,6 +126,16 @@ export default class Map {
   constructor(selector: string, options: MapOptions = {}) {
     this.#zoom = options.zoom ?? this.#zoom;
 
+    const element = document.querySelector(selector) as HTMLElement;
+    if (!element) {
+      console.error(`Map container ${selector} not found`);
+      return;
+    }
+
+    if (element.clientHeight === 0) {
+      element.style.height = '400px';
+    }
+
     const tileOsm = tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
@@ -140,14 +151,31 @@ export default class Map {
       Carto: tileCarto,
     };
 
-    this.#map = map(document.querySelector(selector) as HTMLElement, {
-      zoom: this.#zoom,
-      scrollWheelZoom: true,
-      layers: [tileOsm],
-      ...options,
-    });
+    try {
+      this.#map = map(element, {
+        zoom: this.#zoom,
+        scrollWheelZoom: true,
+        layers: [tileOsm],
+        ...options,
+      });
 
-    this.#map.addControl(control.layers(baseMaps));
+      this.#map.addControl(control.layers(baseMaps));
+
+      setTimeout(() => {
+        this.#map?.invalidateSize();
+        this.#isInitialized = true;
+      }, 100);
+
+      this.#map.whenReady(() => {
+        this.#isInitialized = true;
+      });
+    } catch (error) {
+      console.error('Map initialization error:', error);
+    }
+  }
+
+  isReady(): boolean {
+    return this.#isInitialized && this.#map !== null;
   }
 
   addMapEventListener(eventName: string, callback: (event: LeafletEvent) => void): void {
@@ -160,14 +188,6 @@ export default class Map {
       latitude: center?.lat || 0,
       longitude: center?.lng || 0,
     };
-  }
-
-  changeCamera(coordinate: LatLngExpression, zoomLevel: number | null = null): void {
-    if (!zoomLevel) {
-      this.#map?.setView(latLng(coordinate), this.#zoom);
-      return;
-    }
-    this.#map?.setView(latLng(coordinate), zoomLevel);
   }
 
   createIcon(options: Partial<Icon> = {}): Icon {
@@ -184,32 +204,75 @@ export default class Map {
     coordinates: LatLngExpression,
     markerOptions: MarkerOptions = {},
     popupOptions: (PopupOptions & { content: string }) | null = null,
-  ): Marker {
-    if (typeof markerOptions !== 'object') {
-      throw new Error('markerOptions must be an object');
+  ): Marker | null {
+    if (!this.#map || !this.isReady()) {
+      console.warn('Attempted to add marker but map is not ready');
+      return null;
     }
 
-    const newMarker = marker(coordinates, {
-      icon: this.createIcon(),
-      ...markerOptions,
-    });
-
-    if (popupOptions) {
-      if (typeof popupOptions !== 'object') {
-        throw new Error('popupOptions must be an object');
-      }
-      if (!('content' in popupOptions)) {
-        throw new Error('popupOptions must include `content` property.');
-      }
-
-      const newPopup = popup({
-        ...popupOptions,
-      }).setContent(popupOptions.content);
-
-      newMarker.bindPopup(newPopup);
+    if (!this.#validateCoordinates(coordinates)) {
+      console.warn('Invalid coordinates for marker:', coordinates);
+      return null;
     }
 
-    newMarker.addTo(this.#map!);
-    return newMarker;
+    try {
+      const newMarker = marker(coordinates, {
+        icon: this.createIcon(),
+        ...markerOptions,
+      });
+
+      if (popupOptions) {
+        if (typeof popupOptions !== 'object') {
+          throw new Error('popupOptions must be an object');
+        }
+        if (!('content' in popupOptions)) {
+          throw new Error('popupOptions must include `content` property.');
+        }
+
+        const newPopup = popup({
+          ...popupOptions,
+        }).setContent(popupOptions.content);
+
+        newMarker.bindPopup(newPopup);
+      }
+
+      newMarker.addTo(this.#map);
+      return newMarker;
+    } catch (error) {
+      console.error('Error adding marker:', error);
+      return null;
+    }
+  }
+
+  #validateCoordinates(coordinates: LatLngExpression): boolean {
+    if (Array.isArray(coordinates)) {
+      const [lat, lng] = coordinates;
+      return (
+        typeof lat === 'number' &&
+        typeof lng === 'number' &&
+        !isNaN(lat) &&
+        !isNaN(lng) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180
+      );
+    } else if (typeof coordinates === 'object') {
+      const { lat, lng } = coordinates as any;
+      return this.#validateCoordinates([lat, lng]);
+    }
+    return false;
+  }
+
+  changeCamera(coordinate: LatLngExpression, zoomLevel: number | null = null): void {
+    if (!this.#map || !this.isReady()) return;
+
+    if (this.#validateCoordinates(coordinate)) {
+      if (!zoomLevel) {
+        this.#map.setView(latLng(coordinate), this.#zoom);
+        return;
+      }
+      this.#map.setView(latLng(coordinate), zoomLevel);
+    }
   }
 }

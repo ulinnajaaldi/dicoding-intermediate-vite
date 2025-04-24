@@ -64,7 +64,7 @@ export default class AddNewStory {
                     </div>
                     <div class="flex flex-col gap-2">
                         <p class="text-sm font-heading leading-none">Lokasi</p> 
-                        <div id="map" class=""></div>
+                        <div id="map" ></div>
                         <div id="map-loading-container" class="hidden"></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <input type="number" name="latitude" value="-6.175389" class="input-custom" disabled>
@@ -81,7 +81,6 @@ export default class AddNewStory {
   }
 
   async afterRender() {
-    // Add your logic after rendering the page here
     this.#presenter = new AddNewStoryPresenter({
       view: this,
       model: STORY_API,
@@ -114,7 +113,6 @@ export default class AddNewStory {
       await this.#presenter?.postNewStory(data);
     });
 
-    // Connect button to file input
     const actionInputPicture = document.getElementById('action-input-picture');
     const inputPicture = document.getElementById('input-picture') as HTMLInputElement;
     const cameraContainer = document.getElementById('camera-container') as HTMLDivElement;
@@ -124,7 +122,6 @@ export default class AddNewStory {
       inputPicture.click();
     });
 
-    // Handle file selection
     inputPicture?.addEventListener('change', async (event: Event) => {
       const insertingPicture = (event.target as HTMLInputElement).files?.[0];
       if (insertingPicture) {
@@ -151,39 +148,75 @@ export default class AddNewStory {
   }
 
   async initialMap() {
-    this.#map = await Map.build('#map', {
-      zoom: 10,
-      locate: true,
-    });
+    try {
+      const mapElement = document.getElementById('map');
+      if (mapElement && mapElement.clientHeight === 0) {
+        mapElement.style.height = '300px';
+      }
 
-    const centeredCoordinate = this.#map.getCenter();
+      this.#map = await Map.build('#map', {
+        zoom: 10,
+        locate: true,
+      });
 
-    this.#updateLatLngInput(centeredCoordinate.latitude, centeredCoordinate.longitude);
+      const centeredCoordinate = this.#map.getCenter();
 
-    const draggableMarker = this.#map.addMarker(
-      [centeredCoordinate.latitude, centeredCoordinate.longitude],
-      { draggable: true },
+      if (this.#validateCoordinates(centeredCoordinate.latitude, centeredCoordinate.longitude)) {
+        this.#updateLatLngInput(centeredCoordinate.latitude, centeredCoordinate.longitude);
+
+        const draggableMarker = this.#map.addMarker(
+          [centeredCoordinate.latitude, centeredCoordinate.longitude],
+          { draggable: true },
+        );
+
+        if (draggableMarker) {
+          draggableMarker.addEventListener('move', (event: LeafletEvent) => {
+            const coordinate = event.target.getLatLng();
+
+            if (this.#validateCoordinates(coordinate.lat, coordinate.lng)) {
+              this.#updateLatLngInput(coordinate.lat, coordinate.lng);
+            }
+          });
+
+          this.#map.addMapEventListener('click', (event: LeafletEvent) => {
+            const mouseEvent = event as LeafletMouseEvent;
+
+            if (this.#validateCoordinates(mouseEvent.latlng.lat, mouseEvent.latlng.lng)) {
+              draggableMarker.setLatLng(mouseEvent.latlng);
+              this.#updateLatLngInput(mouseEvent.latlng.lat, mouseEvent.latlng.lng);
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to initialize map:', error);
+    }
+  }
+
+  #validateCoordinates(lat: number, lng: number): boolean {
+    return (
+      typeof lat === 'number' &&
+      typeof lng === 'number' &&
+      !isNaN(lat) &&
+      !isNaN(lng) &&
+      lat >= -90 &&
+      lat <= 90 &&
+      lng >= -180 &&
+      lng <= 180
     );
-
-    draggableMarker.addEventListener('move', (event: LeafletEvent) => {
-      const coordinate = event.target.getLatLng();
-      this.#updateLatLngInput(coordinate.lat, coordinate.lng);
-    });
-
-    this.#map.addMapEventListener('click', (event: LeafletEvent) => {
-      const mouseEvent = event as LeafletMouseEvent;
-      draggableMarker.setLatLng(mouseEvent.latlng);
-    });
   }
 
   #updateLatLngInput(latitude: number, longitude: number) {
     if (!this.#form) return;
 
+    const lat = parseFloat(latitude.toFixed(6));
+    const lng = parseFloat(longitude.toFixed(6));
+
     const longitudeInput = this.#form.elements.namedItem('longitude') as HTMLInputElement | null;
     const latitudeInput = this.#form.elements.namedItem('latitude') as HTMLInputElement | null;
 
-    if (longitudeInput) longitudeInput.value = String(longitude);
-    if (latitudeInput) latitudeInput.value = String(latitude);
+    if (longitudeInput) longitudeInput.value = String(lng);
+    if (latitudeInput) latitudeInput.value = String(lat);
   }
 
   async #addTakenPicture(image: string | Blob) {

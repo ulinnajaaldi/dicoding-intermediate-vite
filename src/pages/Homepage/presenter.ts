@@ -32,8 +32,10 @@ export default class HomePresenter {
     this.#view.showMapLoading();
     try {
       await this.#view.initialMap();
+      return true;
     } catch (error) {
-      console.log('showReportsListMap: error:', error);
+      console.error('showReportsListMap: error:', error);
+      return false;
     } finally {
       this.#view.hideMapLoading();
     }
@@ -41,9 +43,11 @@ export default class HomePresenter {
 
   async initialStories() {
     this.#view.showLoading();
-    try {
-      await this.showReportsListMap();
 
+    const mapPromise = this.showReportsListMap();
+    let storiesData;
+
+    try {
       const response = await this.#model.getAllStories();
       if (!response.ok) {
         console.error('initialStories: error:', response);
@@ -51,19 +55,24 @@ export default class HomePresenter {
         return;
       }
 
-      const listStory = await Promise.all(
+      storiesData = await Promise.all(
         response.listStory.map(async (story) => {
           const report = await storyMapper(story);
           return report;
         }),
       );
-
-      this.#view.populateStoriesList(response.message, listStory);
     } catch (error) {
-      console.log('initialStories: error:', error);
+      console.error('initialStories: error:', error);
       this.#view.populateStoriesListError((error as Error).message);
+      return;
     } finally {
       this.#view.hideLoading();
+    }
+
+    await mapPromise;
+
+    if (storiesData) {
+      this.#view.populateStoriesList('Success', storiesData);
     }
   }
 }

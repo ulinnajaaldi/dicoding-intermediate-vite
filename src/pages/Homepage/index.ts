@@ -7,6 +7,11 @@ import { StoryMapper } from '../../data/api-mapper';
 export default class HomePage {
   #presenter = null as HomePresenter | null;
   #map = null as Map | null;
+  #pendingMarkers: Array<{
+    coordinate: [number, number];
+    markerOptions: any;
+    popupOptions: any;
+  }> = [];
 
   async render() {
     return `
@@ -15,7 +20,7 @@ export default class HomePage {
                 <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center">Ceritain</h1>
                 <p class="text-sm sm:text-xl lg:text-2xl font-medium text-center">Ceritakan semua yang pengen kamu ceritakan!</p>
         </div>
-        <div id="map" class=""></div>
+        <div id="map" class="h-64 md:h-96 w-full"></div>
         <div id="map-loading-container" class="hidden"></div>
     </section>
     <section id="stories-container" class="container min-h-[70svh] my-10">
@@ -46,30 +51,74 @@ export default class HomePage {
 
     if (container) {
       const html = listStory.reduce((acc, story) => {
-        if (this.#map && story?.location?.latitude != null && story?.location?.longitude != null) {
-          const coordinate = [story.location.latitude, story.location.longitude] as [
-            number,
-            number,
-          ];
-          const markerOptions = { alt: `${story.name}-${story.description}` };
-          const popupOptions = {
-            content: generatePopoutMap({ story }),
-          };
-          this.#map.addMarker(coordinate, markerOptions, popupOptions);
-        }
+        this.addStoryMarker(story);
         return acc.concat(generateCardStory(story));
       }, '');
       container.innerHTML = html;
+
+      this.processPendingMarkers();
     } else {
       console.error('list-story element not found');
     }
   }
 
+  addStoryMarker(story: StoryMapper) {
+    if (!story?.location || story.location.latitude == null || story.location.longitude == null) {
+      return;
+    }
+
+    const lat = parseFloat(String(story.location.latitude));
+    const lng = parseFloat(String(story.location.longitude));
+
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn('Invalid coordinates for story:', story.id);
+      return;
+    }
+
+    const coordinate: [number, number] = [lat, lng];
+    const markerOptions = { alt: `${story.name}-${story.description}` };
+    const popupOptions = {
+      content: generatePopoutMap({ story }),
+    };
+
+    if (this.#map && this.#map.isReady()) {
+      this.#map.addMarker(coordinate, markerOptions, popupOptions);
+    } else {
+      this.#pendingMarkers.push({
+        coordinate,
+        markerOptions,
+        popupOptions,
+      });
+    }
+  }
+
+  processPendingMarkers() {
+    if (!this.#map || !this.#map.isReady() || this.#pendingMarkers.length === 0) {
+      return;
+    }
+
+    while (this.#pendingMarkers.length > 0) {
+      const marker = this.#pendingMarkers.shift();
+      if (marker) {
+        this.#map.addMarker(marker.coordinate, marker.markerOptions, marker.popupOptions);
+      }
+    }
+  }
+
   async initialMap() {
-    this.#map = await Map.build('#map', {
-      zoom: 10,
-      locate: true,
-    });
+    try {
+      const mapElement = document.getElementById('map');
+      if (mapElement && mapElement.clientHeight === 0) {
+        mapElement.style.height = '400px';
+      }
+
+      this.#map = await Map.build('#map', {
+        zoom: 10,
+        locate: true,
+      });
+    } catch (error) {
+      console.error('Failed to initialize map:', error);
+    }
   }
 
   showLoading() {
