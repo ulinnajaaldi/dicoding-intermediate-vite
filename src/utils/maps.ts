@@ -143,11 +143,11 @@ export default class Map {
     this.#map = map(document.querySelector(selector) as HTMLElement, {
       zoom: this.#zoom,
       scrollWheelZoom: true,
-      layers: [tileOsm, tileCarto],
+      layers: [tileOsm],
       ...options,
     });
 
-    control.layers(baseMaps).addTo(this.#map!);
+    this.#map.addControl(control.layers(baseMaps));
   }
 
   addMapEventListener(eventName: string, callback: (event: LeafletEvent) => void): void {
