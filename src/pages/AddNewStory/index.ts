@@ -1,4 +1,3 @@
-import Toastify from 'toastify-js';
 import { LeafletEvent, LeafletMouseEvent } from 'leaflet';
 
 import * as STORY_API from '../../data/api';
@@ -6,6 +5,7 @@ import AddNewStoryPresenter from './presenter';
 import { convertBase64ToBlob } from '../../utils';
 import Camera from '../../utils/camera';
 import Map from '../../utils/maps';
+import { useToast } from '../../utils/toast';
 
 export default class AddNewStory {
   #presenter = null as AddNewStoryPresenter | null;
@@ -18,9 +18,9 @@ export default class AddNewStory {
   async render() {
     return `
         <section class="page-wrapper">
-            <div class="flex flex-col gap-1 items-center justify-center mb-5">
-                <h1 class="text-2xl font-bold">Cerita apa hari ini?</h1>
-                <p>Lengkapi form dibawah untuk membagikan cerita</p>
+            <div class="flex flex-col gap-1 items-center justify-center text-center mb-5">
+                <h1 class="text-xl md:text-2xl font-bold">Cerita apa hari ini?</h1>
+                <p class="text-sm md:text-base">Lengkapi form dibawah untuk membagikan cerita</p>
             </div>
             <div class="card flex items-center justify-center">
                 <form id="add-new-story-form" class="flex flex-col gap-5 w-full max-w-lg">
@@ -30,7 +30,7 @@ export default class AddNewStory {
                     </div>
                     <div class="flex flex-col gap-2">
                         <label for="input-picture" class="text-sm font-medium">Foto</label>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center flex-wrap gap-2">
                             <button id="action-input-picture" type="button" class="button-custom-neutral">Ambil Gambar</button>
                             <input
                                 id="input-picture"
@@ -62,10 +62,11 @@ export default class AddNewStory {
                         <div id="documentations-taken-list" class="flex items-center justify-center mt-2">
                         </div>
                     </div>
-                    <div class="flex flex-col gap-2"> 
+                    <div class="flex flex-col gap-2">
+                        <p class="text-sm font-heading leading-none">Lokasi</p> 
                         <div id="map" class=""></div>
                         <div id="map-loading-container" class="hidden"></div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <input type="number" name="latitude" value="-6.175389" class="input-custom" disabled>
                             <input type="number" name="longitude" value="106.827139" class="input-custom" disabled>
                         </div>
@@ -99,10 +100,7 @@ export default class AddNewStory {
       event.preventDefault();
 
       if (!this.#takenPicture) {
-        Toastify({
-          text: 'Silahkan ambil gambar atau pilih gambar terlebih dahulu',
-          duration: 3000,
-        }).showToast();
+        useToast('Silahkan ambil gambar atau pilih gambar terlebih dahulu', 'error');
         return;
       }
 
@@ -251,20 +249,14 @@ export default class AddNewStory {
   }
 
   storeSuccessfully(message: string) {
-    Toastify({
-      text: message,
-      duration: 3000,
-    }).showToast();
+    useToast(message, 'success');
     this.clearForm();
 
     location.hash = '/';
   }
 
   storeFailed(message: string) {
-    Toastify({
-      text: message,
-      duration: 3000,
-    }).showToast();
+    useToast(message, 'error');
   }
 
   clearForm() {

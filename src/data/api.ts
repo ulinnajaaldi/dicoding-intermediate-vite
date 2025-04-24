@@ -69,6 +69,24 @@ export async function getAllStories() {
   };
 }
 
+export async function getDetailStory(id: string) {
+  const accessToken = getAccessToken();
+
+  const response = await fetch(`${ENDPOINTS.ALL_STORIES}/${id}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const results = await response.json();
+
+  return {
+    ...results,
+    ok: response.ok,
+  };
+}
+
 export async function mutateNewStory({ description, photo, lat, lon }: IAddNewStory) {
   const accessToken = getAccessToken();
 

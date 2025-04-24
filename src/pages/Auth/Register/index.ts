@@ -1,7 +1,6 @@
-import Toastify from 'toastify-js';
-
 import RegisterPresenter from './presenter';
 import * as STORY_API from '../../../data/api';
+import { useToast } from '../../../utils/toast';
 
 export default class RegisterPage {
   #presenter = null as RegisterPresenter | null;
@@ -54,19 +53,13 @@ export default class RegisterPage {
   }
 
   registeredSuccessfully(message: string) {
-    Toastify({
-      text: message,
-      duration: 3000,
-    }).showToast();
+    useToast(message, 'success');
 
     location.hash = '/login';
   }
 
   registeredFailed(message: string) {
-    Toastify({
-      text: message,
-      duration: 3000,
-    }).showToast();
+    useToast(message, 'error');
   }
 
   showSubmitLoadingButton() {

@@ -1,6 +1,6 @@
 import HomePresenter from './presenter';
 import * as STORY_API from '../../data/api';
-import { generateCardStory } from '../../components/templates';
+import { generateCardStory, generatePopoutMap } from '../../components/templates';
 import Map from '../../utils/maps';
 import { StoryMapper } from '../../data/api-mapper';
 
@@ -53,21 +53,13 @@ export default class HomePage {
           ];
           const markerOptions = { alt: `${story.name}-${story.description}` };
           const popupOptions = {
-            content: `
-            <div class="flex flex-col">
-                <p class="font-bold">${story.name}</p>
-                <div class="relative w-32 h-32 sm:w-60 sm:h-60 overflow-hidden rounded-lg">
-                    <img src="${story.photoUrl}" alt="${story.name}-${story.description}" class="object-cover rounded-lg w-full h-full "/>
-                </div>
-                <p class="text-sm">${story.description}</p>
-            </div>`,
+            content: generatePopoutMap({ story }),
           };
           this.#map.addMarker(coordinate, markerOptions, popupOptions);
         }
         return acc.concat(generateCardStory(story));
       }, '');
       container.innerHTML = html;
-      console.log('Story HTML inserted successfully');
     } else {
       console.error('list-story element not found');
     }

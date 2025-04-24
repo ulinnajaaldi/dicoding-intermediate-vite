@@ -33,27 +33,45 @@ export const generateCardStory = ({
   photoUrl,
 }: StoryMapper) => {
   return `
-                <div tabindex="0" data-storyid="${id}" class="card">
-                    <div class="flex flex-col gap-2">
-                        <div class="relative w-full h-64 overflow-hidden rounded-lg">
-                            <img src="${photoUrl}" alt="${name}-${description}" class="h-64 w-full object-cover rounded-t-lg"/>
-                        </div>
-                        <div class="card-header">
-                            <h2 class="text-lg font-semibold">${name}</h2>
-                            <div class="flex items-center flex-wrap justify-between w-full">
-                                ${location ? `<p class="text-base">${location.placeName}</p>` : ``}
-                                <p class="text-sm">${new Date(createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <p class="text-base line-clamp-3">${description}</p>
-                        <div class="flex items-center justify-end"> 
-                            <button class="button-custom w-fit">
-                                Lihat Detail
-                            </button>
-                        </div>
+        <div tabindex="0" data-storyid="${id}" class="card">
+            <div class="flex flex-col gap-2">
+                <div class="relative w-full h-64 overflow-hidden rounded-lg">
+                    <img src="${photoUrl}" alt="${name}-${description}" class="h-64 w-full object-cover rounded-t-lg"/>
+                </div>
+                <div class="card-header">
+                    <h2 class="text-lg font-semibold">${name}</h2>
+                    <div class="flex items-center flex-wrap justify-between w-full">
+                        ${
+                          location
+                            ? `<p class="text-base">
+                        <i class="fas fa-map-marker-alt"></i> 
+                        ${location.placeName}</p>`
+                            : ``
+                        }
+                        <p class="text-sm">${new Date(createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                     </div>
                 </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <p class="text-base line-clamp-3">${description}</p>
+                <div class="flex items-center justify-end"> 
+                    <a class="button-custom w-fit" href="#/story/${id}">
+                        Lihat Detail
+                    </a>
+                </div>
+            </div>
+        </div>
     `;
+};
+
+export const generatePopoutMap = ({ story }: { story: StoryMapper }) => {
+  return `
+        <div class="flex flex-col">
+            <p class="font-bold">${story.name}</p>
+            <div class="relative w-32 h-32 sm:w-60 sm:h-60 overflow-hidden rounded-lg">
+                <img src="${story.photoUrl}" alt="${story.name}-${story.description}" class="object-cover rounded-lg w-full h-full "/>
+            </div>
+            <p class="text-sm">${story.description}</p>
+        </div>
+        `;
 };

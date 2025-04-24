@@ -1,5 +1,3 @@
-import Toastify from 'toastify-js';
-
 import {
   generateNavigationAuthenticated,
   generateNavigationUnauthenticated,
@@ -8,6 +6,7 @@ import routes from '../constants/routes';
 import { setupSkipToContent, transitionHelper } from '../utils';
 import { getAccessToken, getLogout } from '../utils/auth';
 import { getActiveRoute } from '../utils/url-parser';
+import { useToast } from '../utils/toast';
 
 type AppConstructor = {
   navigationDrawer: HTMLElement | null;
@@ -111,10 +110,7 @@ class App {
         getLogout();
 
         location.hash = '/login';
-        Toastify({
-          text: 'Logout Berhasil',
-          duration: 3000,
-        }).showToast();
+        useToast('Logout Berhasil', 'success');
       }
     });
 
