@@ -33,8 +33,8 @@ export async function storyMapper(story: IStory): Promise<StoryMapper> {
     photoUrl: story.photoUrl,
     createdAt: story.createdAt,
     location: {
-      longitude: story.lat,
-      latitude: story.lon,
+      longitude: story.lon,
+      latitude: story.lat,
       placeName: await Map.getPlaceNameByCoordinate(story.lat, story.lon),
     },
   };
