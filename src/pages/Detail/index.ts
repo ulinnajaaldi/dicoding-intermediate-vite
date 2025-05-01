@@ -141,10 +141,24 @@ export default class Detail {
   }
 
   showLoading() {
-    console.log('showLoading');
+    const container = document.getElementById('detail-story-loading-container') as HTMLDivElement;
+    container.classList.remove('hidden');
+
+    container.innerHTML = `
+        <div class="grid grid-cols-12 gap-4 h-[70dvh]">
+            <div class="col-span-12 lg:col-span-8 w-full h-full overflow-hidden rounded-lg !bg-white">
+                <div class="h-full w-full animate-pulse bg-gray-200 rounded-t-lg"></div>
+            </div>
+            <div class="col-span-12 lg:col-span-4 h-full overflow-hidden rounded-2xl">
+                <div class="h-full w-full animate-pulse bg-gray-200 rounded-t-lg"></div>
+            </div>
+        </div>
+    `;
   }
 
   hideLoading() {
-    console.log('hideLoading');
+    const container = document.getElementById('detail-story-loading-container') as HTMLDivElement;
+    container.classList.add('hidden');
+    container.innerHTML = '';
   }
 }
