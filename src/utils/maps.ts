@@ -79,6 +79,7 @@ export default class Map {
       }
 
       const place = json.features[0].place_name.split(', ');
+      // @ts-ignore
       return [place.at(-2), place.at(-1)].filter((name) => name).join(', ');
     } catch (error) {
       console.error('getPlaceNameByCoordinate: error:', error);
