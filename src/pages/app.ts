@@ -1,12 +1,19 @@
 import {
   generateNavigationAuthenticated,
   generateNavigationUnauthenticated,
+  generateSubscribeButtonTemplate,
+  generateUnsubscribeButtonTemplate,
 } from '../components/templates';
 import routes from '../constants/routes';
-import { setupSkipToContent, transitionHelper } from '../utils';
+import { isServiceWorkerAvailable, setupSkipToContent, transitionHelper } from '../utils';
 import { getAccessToken, getLogout } from '../utils/auth';
 import { getActiveRoute } from '../utils/url-parser';
 import { useToast } from '../utils/toast';
+import {
+  isCurrentPushSubscriptionAvailable,
+  subscribe,
+  unsubscribe,
+} from '../utils/notification-helper';
 
 type AppConstructor = {
   navigationDrawer: HTMLElement | null;
@@ -138,6 +145,31 @@ class App {
     }
   }
 
+  async #setupPushNotification() {
+    const pushNotificationButton = document.getElementById(
+      'action-push-notification',
+    ) as HTMLLIElement;
+    const isSubscribed = await isCurrentPushSubscriptionAvailable();
+
+    if (isSubscribed) {
+      pushNotificationButton.innerHTML = generateUnsubscribeButtonTemplate();
+      document.getElementById('unsubscribe-button')?.addEventListener('click', () => {
+        unsubscribe().finally(() => {
+          this.#setupPushNotification();
+        });
+      });
+
+      return;
+    }
+
+    pushNotificationButton.innerHTML = generateSubscribeButtonTemplate();
+    document.getElementById('subscribe-button')?.addEventListener('click', () => {
+      subscribe().finally(() => {
+        this.#setupPushNotification();
+      });
+    });
+  }
+
   async renderPage() {
     const url = getActiveRoute() || '/';
     const route = routes[url as keyof typeof routes];
@@ -157,6 +189,10 @@ class App {
     transition.updateCallbackDone.then(() => {
       scrollTo({ top: 0, behavior: 'instant' });
       this.#setupNavigationList();
+
+      if (isServiceWorkerAvailable()) {
+        this.#setupPushNotification();
+      }
     });
   }
 }

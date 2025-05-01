@@ -82,3 +82,7 @@ export function transitionHelper({
 
   return document.startViewTransition(updateDOM);
 }
+
+export function isServiceWorkerAvailable() {
+  return 'serviceWorker' in navigator;
+}
