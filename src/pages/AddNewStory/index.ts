@@ -72,7 +72,7 @@ export default class AddNewStory {
                         </div>
                     </div>
                     <div id="submit-button-container" >
-                        <button type="submit" id="submit-button" class="button-custom">Kirim Cerita</button>
+                        <button type="submit" id="submit-button" class="button-custom w-full">Kirim Cerita</button>
                     </div>
                 </form>
             </div>
