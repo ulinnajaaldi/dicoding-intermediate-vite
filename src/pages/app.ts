@@ -14,6 +14,7 @@ import {
   subscribe,
   unsubscribe,
 } from '../utils/notification-helper';
+import NotFoundPage from './NotFound';
 
 type AppConstructor = {
   navigationDrawer: HTMLElement | null;
@@ -172,9 +173,10 @@ class App {
 
   async renderPage() {
     const url = getActiveRoute() || '/';
-    const route = routes[url as keyof typeof routes];
 
-    const page = route();
+    const routeExists = url && routes[url as keyof typeof routes];
+
+    const page = routeExists ? routes[url as keyof typeof routes]() : new NotFoundPage();
 
     const transition = transitionHelper({
       updateDOM: async () => {
