@@ -4,6 +4,8 @@ import * as STORY_API from '../../data/api';
 import { parseActivePathname } from '../../utils/url-parser';
 import { StoryMapper } from '../../data/api-mapper';
 import { generatePopoutMap } from '../../components/templates';
+import Database from '../../utils/database';
+import { useToast } from '../../utils/toast';
 
 export default class Detail {
   #presenter = null as DetailPresenter | null;
@@ -30,6 +32,7 @@ export default class Detail {
     this.#presenter = new DetailPresenter(parseActivePathname().id as string, {
       view: this,
       model: STORY_API,
+      dbModel: Database,
     });
 
     await this.#presenter?.initialStory();
@@ -51,7 +54,6 @@ export default class Detail {
             </div>
 
             <div class="grid grid-cols-12 gap-4">
-
                 <div class="relative col-span-12 lg:col-span-8 w-full h-[400px] sm:h-[500px] lg:h-[600px] overflow-hidden rounded-lg card !bg-white">
                     <img src="${story.photoUrl}" alt="${story.name}-${story.description}" class="h-full w-full object-contain rounded-t-lg"/>
                 </div>
@@ -62,6 +64,12 @@ export default class Detail {
                     `
                     : ''
                 }
+                <div class="col-span-12 flex items-center justify-between">
+                    <p class="text-sm md:text-base font-semibold">Aksi</p>
+                    <div id="action-container" class="flex gap-2 items-center justify-start flex-wrap">
+                        <button id="btn-action" class="button-custom-neutral">Bookmark Cerita</button>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -70,6 +78,8 @@ export default class Detail {
     container.innerHTML = html;
 
     this.storeMarkerData(story);
+
+    await this.#presenter?.showSaveButton();
   }
 
   storeMarkerData(story: StoryMapper) {
@@ -160,5 +170,35 @@ export default class Detail {
     const container = document.getElementById('detail-story-loading-container') as HTMLDivElement;
     container.classList.add('hidden');
     container.innerHTML = '';
+  }
+
+  renderActionButton(isSaved = false) {
+    const action = document.getElementById('btn-action') as HTMLDivElement;
+    if (!action) return;
+
+    // Remove existing listeners by cloning and replacing the button
+    const newButton = action.cloneNode(true) as HTMLDivElement;
+    action.parentNode?.replaceChild(newButton, action);
+
+    if (isSaved) {
+      newButton.innerText = 'Hapus dari Bookmark';
+      newButton.addEventListener('click', async () => {
+        await this.#presenter?.removeStory();
+        await this.#presenter?.showSaveButton();
+      });
+    } else {
+      newButton.innerText = 'Bookmark Cerita';
+      newButton.addEventListener('click', async () => {
+        await this.#presenter?.saveStory();
+        await this.#presenter?.showSaveButton();
+      });
+    }
+  }
+
+  saveToBookmarkSuccessfully(message: string) {
+    useToast(message, 'success');
+  }
+  saveToBookmarkFailed(message: string) {
+    useToast(message, 'error');
   }
 }
