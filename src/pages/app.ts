@@ -152,23 +152,25 @@ class App {
     ) as HTMLLIElement;
     const isSubscribed = await isCurrentPushSubscriptionAvailable();
 
-    if (isSubscribed) {
-      pushNotificationButton.innerHTML = generateUnsubscribeButtonTemplate();
-      document.getElementById('unsubscribe-button')?.addEventListener('click', () => {
-        unsubscribe().finally(() => {
+    if (pushNotificationButton) {
+      if (isSubscribed) {
+        pushNotificationButton.innerHTML = generateUnsubscribeButtonTemplate();
+        document.getElementById('unsubscribe-button')?.addEventListener('click', () => {
+          unsubscribe().finally(() => {
+            this.#setupPushNotification();
+          });
+        });
+
+        return;
+      }
+
+      pushNotificationButton.innerHTML = generateSubscribeButtonTemplate();
+      document.getElementById('subscribe-button')?.addEventListener('click', () => {
+        subscribe().finally(() => {
           this.#setupPushNotification();
         });
       });
-
-      return;
     }
-
-    pushNotificationButton.innerHTML = generateSubscribeButtonTemplate();
-    document.getElementById('subscribe-button')?.addEventListener('click', () => {
-      subscribe().finally(() => {
-        this.#setupPushNotification();
-      });
-    });
   }
 
   async renderPage() {
