@@ -86,6 +86,20 @@ registerRoute(
   }),
 );
 
+registerRoute(
+  ({ request }) => {
+    return request.destination === 'image';
+  },
+  new CacheFirst({
+    cacheName: 'images',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+    ],
+  }),
+);
+
 self.addEventListener('push', (event) => {
   console.log('[Service worker] pushing...');
 
