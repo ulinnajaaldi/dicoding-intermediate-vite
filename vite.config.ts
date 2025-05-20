@@ -16,7 +16,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       manifest: {
-        start_url: 'https://ceritain-vite.netlify.app/',
+        start_url: '/',
         lang: 'id-ID',
         orientation: 'any',
         name: 'Ceritain App',
