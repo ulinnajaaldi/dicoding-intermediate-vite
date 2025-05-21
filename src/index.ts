@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import './style.css';
 
 import App from './pages/app';
+import Camera from './utils/camera';
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = new App({
@@ -16,5 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('hashchange', async () => {
     await app.renderPage();
+
+    Camera.stopAllStreams();
   });
 });
